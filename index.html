@@ -286,16 +286,18 @@
 
         // 1. 初始化資料
         const POPULAR_CATEGORIES = ["保安及物業管理", "飲食", "包裝", "運輸及物流", "教育", "健身", "辦公室", "活動及推廣", "醫療保健", "建造業", "清潔", "客戶服務"];
+        
+        // 模擬數據庫 (實際應連接 Firestore)
         let mockJobs = [
-            { id: 1, date: '2024-04-20', title: "高級物業管理員", company: "信和物業", category: "保安及物業管理", contact: "Mr. Wong", phone: "23334444", location: "九龍", type: "全職", salary: "$19,000", icon: "fas fa-shield-alt text-blue-500", desc: "負責屋苑日常保安及客戶服務。", owner: "sino_hr@gmail.com" },
-            { id: 2, date: '2024-04-19', title: "連鎖店廚務助理", company: "太興集團", category: "飲食", contact: "Ms. Lee", phone: "21110000", location: "香港島", type: "兼職", salary: "$65/小時", icon: "fas fa-utensils text-orange-500", desc: "協助廚師準備食材及維持廚房清潔。", owner: "taihing_hr@gmail.com" },
-            { id: 3, date: '2024-04-18', title: "物流跟車員", company: "順豐速運", category: "運輸及物流", contact: "Mr. Chan", phone: "25556666", location: "新界區", type: "全職", salary: "$17,500", icon: "fas fa-truck text-red-600", desc: "協助搬運及遞送包裹。", owner: "sf_hr@gmail.com" }
+            { id: Date.now() + 1, date: '2024-04-20', title: "高級物業管理員", company: "信和物業", category: "保安及物業管理", contact: "Mr. Wong", phone: "23334444", location: "九龍", type: "全職", salary: "$19,000", icon: "fas fa-shield-alt text-blue-500", desc: "負責屋苑日常保安及客戶服務。", owner: "sino_hr@gmail.com" },
+            { id: Date.now() + 2, date: '2024-04-19', title: "連鎖店廚務助理", company: "太興集團", category: "飲食", contact: "Ms. Lee", phone: "21110000", location: "香港島", type: "兼職", salary: "$65/小時", icon: "fas fa-utensils text-orange-500", desc: "協助廚師準備食材及維持廚房清潔。", owner: "taihing_hr@gmail.com" },
+            { id: Date.now() + 3, date: '2024-04-18', title: "物流跟車員", company: "順豐速運", category: "運輸及物流", contact: "Mr. Chan", phone: "25556666", location: "新界區", type: "全職", salary: "$17,500", icon: "fas fa-truck text-red-600", desc: "協助搬運及遞送包裹。", owner: "sf_hr@gmail.com" }
         ];
         let applications = [];
         let selectedCategory = null;
         let currentUser = null;
 
-        // 2. Firebase 配置 (請在此替換為您的配置)
+        // 2. Firebase 配置 (請確保您的 API Key 正確)
         const firebaseConfig = {
             apiKey: "YOUR_API_KEY",
             authDomain: "YOUR_PROJECT.firebaseapp.com",
@@ -309,7 +311,7 @@
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
 
-        // 3. 全局函數掛載 (以便 HTML 內的 onclick 調用)
+        // 3. 全局函數掛載
         window.renderCategories = () => {
             const nav = document.getElementById('category-nav');
             if(!nav) return;
@@ -390,7 +392,6 @@
                 <button onclick="window.openApplyModal('${job.title}', '${job.id}', '${job.owner}')" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 shadow-xl shadow-blue-100 transition">立即申請職位</button>`;
         };
 
-        // 4. 登入邏輯
         onAuthStateChanged(auth, (user) => {
             currentUser = user;
             const authBtn = document.getElementById('auth-buttons');
@@ -427,7 +428,6 @@
             window.showListPage();
         });
 
-        // UI Helpers
         window.openLoginModal = () => document.getElementById('login-modal').classList.remove('hidden');
         window.closeLoginModal = () => document.getElementById('login-modal').classList.add('hidden');
         window.showToast = (msg) => { const t = document.getElementById('toast'); document.getElementById('toast-msg').textContent = msg; t.classList.remove('hidden'); setTimeout(() => t.classList.add('hidden'), 3000); };
@@ -435,13 +435,51 @@
         window.resetFiltersAndShowList = () => { window.resetFilters(); window.showListPage(); };
         window.togglePostForm = () => { const f = document.getElementById('job-post-form'); const isH = f.classList.contains('hidden'); f.classList.toggle('hidden', !isH); document.getElementById('post-toggle-btn').textContent = isH ? "收起表單" : "展開表單"; };
 
+        // 提交發佈職位
+        document.getElementById('job-post-form').onsubmit = (e) => {
+            e.preventDefault();
+            if(!currentUser) return window.showToast("請先登入");
+            
+            const newJob = {
+                id: Date.now(),
+                date: new Date().toISOString().split('T')[0],
+                company: document.getElementById('post-company').value,
+                title: document.getElementById('post-title').value,
+                category: document.getElementById('post-category').value,
+                location: document.getElementById('post-location').value,
+                type: document.getElementById('post-type').value,
+                salary: document.getElementById('post-salary').value,
+                contact: document.getElementById('post-contact').value,
+                phone: document.getElementById('post-phone').value,
+                desc: document.getElementById('post-content').value,
+                owner: currentUser.email,
+                icon: "fas fa-briefcase text-blue-500"
+            };
+            
+            mockJobs.unshift(newJob);
+            window.showToast("職位已成功發佈！");
+            document.getElementById('job-post-form').reset();
+            window.togglePostForm();
+            window.renderCategories();
+            window.applyFilters();
+        };
+
         window.openApplyModal = (title, id, owner) => {
             document.getElementById('apply-job-title').textContent = title;
             document.getElementById('apply-modal').classList.remove('hidden');
             document.getElementById('apply-form').onsubmit = (e) => {
                 e.preventDefault();
-                applications.push({ jobId: id, jobTitle: title, jobOwner: owner, name: document.getElementById('apply-name').value, phone: document.getElementById('apply-phone').value, experience: document.getElementById('apply-experience').value, date: new Date().toLocaleDateString() });
+                applications.push({ 
+                    jobId: id, 
+                    jobTitle: title, 
+                    jobOwner: owner, 
+                    name: document.getElementById('apply-name').value, 
+                    phone: document.getElementById('apply-phone').value, 
+                    experience: document.getElementById('apply-experience').value, 
+                    date: new Date().toLocaleDateString() 
+                });
                 document.getElementById('apply-modal').classList.add('hidden');
+                document.getElementById('apply-form').reset();
                 window.showToast("申請已提交！");
             };
         };
@@ -472,11 +510,10 @@
         };
 
         // 初始化
-        window.onload = () => {
+        window.addEventListener('DOMContentLoaded', () => {
             window.renderCategories();
             window.applyFilters();
-        };
-
+        });
     </script>
 </body>
 </html>
