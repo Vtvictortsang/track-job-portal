@@ -298,18 +298,18 @@
         let currentUser = null;
 
         // 2. Firebase 配置 (請確保您的 API Key 正確)
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT.firebaseapp.com",
-            projectId: "YOUR_PROJECT",
-            storageBucket: "YOUR_PROJECT.appspot.com",
-            messagingSenderId: "YOUR_ID",
-            appId: "YOUR_APP_ID"
-        };
+const firebaseConfig = {
+    apiKey: "AIzaSyCPJpA6HIGlDZ1gnOC68tbQune6msp5BPg",
+    authDomain: "track-job-portal.firebaseapp.com",
+    projectId: "track-job-portal",
+    storageBucket: "track-job-portal.firebasestorage.app",
+    messagingSenderId: "968955074908",
+    appId: "1:968955074908:web:20c3f9e78c2487c7440999"
+};
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 
         // 3. 全局函數掛載
         window.renderCategories = () => {
