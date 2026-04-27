@@ -21,273 +21,188 @@
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .google-btn {
-            transition: all 0.3s;
-            border: 1px solid #dadce0;
-        }
-        .google-btn:hover {
-            background-color: #f8f9fa;
-            box-shadow: 0 1px 3px rgba(60,64,67,0.3);
-        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="bg-slate-50 min-h-screen pb-20">
 
-    <!-- 頂部導航欄 -->
-    <header class="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-100">
-        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
-            <div class="flex items-center gap-2 cursor-pointer" onclick="resetFiltersAndShowList()">
-                <div class="bg-blue-600 p-1.5 rounded-lg">
-                    <i class="fas fa-route text-white text-xl"></i>
+    <!-- 導航欄 -->
+    <header class="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="window.resetFiltersAndShowList()">
+                <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-100">
+                    <i class="fas fa-location-arrow text-white text-lg"></i>
                 </div>
-                <h1 class="text-2xl font-bold text-blue-600 tracking-tight">Track</h1>
+                <h1 class="text-xl font-black text-slate-900 tracking-tight">TRACK</h1>
             </div>
 
-            <div class="flex-1 max-w-xl hidden md:block">
-                <div class="relative">
-                    <input type="text" id="jobSearchInput" oninput="applyFilters()" placeholder="搜尋職位、公司或關鍵字..." 
-                           class="w-full pl-10 pr-4 py-2 bg-gray-100 border-transparent focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent rounded-full transition-all outline-none text-sm">
-                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <div class="flex items-center gap-4">
+                <div id="auth-buttons" class="flex gap-2">
+                    <button onclick="window.openLoginModal()" class="px-5 py-2 text-sm font-bold text-blue-600 hover:bg-blue-50 rounded-xl transition">
+                        登入 / 註冊
+                    </button>
                 </div>
-            </div>
-
-            <!-- 未登入狀態 -->
-            <div id="auth-buttons" class="flex items-center gap-3">
-                <button onclick="openLoginModal()" class="bg-blue-600 text-white text-sm font-medium px-5 py-2.5 rounded-full hover:bg-blue-700 transition shadow-md shadow-blue-100 flex items-center gap-2">
-                    <i class="fas fa-briefcase text-xs"></i> 僱主入口
-                </button>
-            </div>
-
-            <!-- 已登入狀態 -->
-            <div id="user-profile" class="hidden flex items-center gap-4">
-                <div class="flex items-center gap-2 border-r pr-4 border-gray-200 cursor-pointer hover:bg-gray-50 p-1 rounded-lg transition" onclick="showEmployerProfile()">
-                    <img id="user-avatar" class="w-8 h-8 rounded-full border border-gray-200" src="" alt="Avatar">
-                    <div class="hidden sm:block text-left">
-                        <p id="user-display-name" class="text-sm font-bold text-gray-800 leading-none"></p>
-                        <p class="text-[10px] text-blue-600 font-medium uppercase">管理後台</p>
-                    </div>
+                <div id="user-profile" class="hidden flex items-center gap-3 bg-white p-1.5 pr-4 rounded-2xl border border-gray-100 shadow-sm cursor-pointer hover:bg-gray-50 transition" onclick="window.showEmployerProfile()">
+                    <img id="user-avatar" class="w-8 h-8 rounded-xl object-cover ring-2 ring-blue-50" src="" alt="avatar">
+                    <span id="user-display-name" class="text-xs font-bold text-slate-700"></span>
                 </div>
-                <button onclick="handleLogout()" class="text-gray-400 hover:text-red-500 transition">
-                    <i class="fas fa-sign-out-alt"></i>
-                </button>
             </div>
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 py-6 flex flex-col md:flex-row gap-6 flex-1 w-full">
+    <main class="max-w-7xl mx-auto px-4 mt-8 flex flex-col md:flex-row gap-8">
         
-        <!-- 左側欄 -->
-        <aside id="left-sidebar" class="w-full md:w-72 flex-shrink-0 space-y-6">
-            <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 sticky top-24">
-                <div class="mb-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
-                            <i class="fas fa-sliders-h text-[10px]"></i> 篩選條件
-                        </h2>
-                        <button onclick="resetFilters()" class="text-[10px] text-blue-600 hover:underline font-bold">清除全部</button>
-                    </div>
-
-                    <!-- 工作性質 -->
-                    <p class="text-sm font-bold text-gray-700 mb-3">工作性質</p>
-                    <div class="flex flex-wrap gap-2 mb-6">
-                        <label class="cursor-pointer">
-                            <input type="checkbox" name="typeFilter" value="全職" class="hidden peer" onchange="applyFilters()">
-                            <span class="tag-btn px-3 py-1.5 rounded-lg border border-gray-100 bg-gray-50 text-[11px] text-gray-600 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 inline-block">全職</span>
-                        </label>
-                        <label class="cursor-pointer">
-                            <input type="checkbox" name="typeFilter" value="兼職" class="hidden peer" onchange="applyFilters()">
-                            <span class="tag-btn px-3 py-1.5 rounded-lg border border-gray-100 bg-gray-50 text-[11px] text-gray-600 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 inline-block">兼職</span>
-                        </label>
-                        <label class="cursor-pointer">
-                            <input type="checkbox" name="typeFilter" value="臨時工" class="hidden peer" onchange="applyFilters()">
-                            <span class="tag-btn px-3 py-1.5 rounded-lg border border-gray-100 bg-gray-50 text-[11px] text-gray-600 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 inline-block">臨時工</span>
-                        </label>
-                    </div>
-
-                    <!-- 工作地區 -->
-                    <p class="text-sm font-bold text-gray-700 mb-3">工作地區</p>
-                    <div class="space-y-2 mb-6">
-                        <label class="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" name="locFilter" value="香港島" class="w-4 h-4 rounded text-blue-600 border-gray-300" onchange="applyFilters()">
-                            <span class="text-sm text-gray-600 group-hover:text-blue-600 transition">香港島</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" name="locFilter" value="九龍" class="w-4 h-4 rounded text-blue-600 border-gray-300" onchange="applyFilters()">
-                            <span class="text-sm text-gray-600 group-hover:text-blue-600 transition">九龍</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" name="locFilter" value="新界區" class="w-4 h-4 rounded text-blue-600 border-gray-300" onchange="applyFilters()">
-                            <span class="text-sm text-gray-600 group-hover:text-blue-600 transition">新界區</span>
-                        </label>
-                    </div>
-
-                    <!-- 職業分類 -->
-                    <div class="pt-4 border-t border-gray-100">
-                        <h2 class="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2">
-                            <i class="fas fa-th-large text-blue-600 text-xs"></i> 熱門職業分類
-                        </h2>
-                        <nav class="space-y-1 max-h-[360px] overflow-y-auto custom-scrollbar pr-2" id="category-nav"></nav>
-                    </div>
-                </div>
+        <!-- 左側：職位分類 -->
+        <aside class="w-full md:w-64 space-y-6">
+            <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+                <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">熱門分類</h2>
+                <nav id="category-nav" class="space-y-1"></nav>
             </div>
         </aside>
 
-        <!-- 右側主內容區 -->
-        <section id="main-content-area" class="flex-1 flex flex-col gap-8">
-            <!-- 列表視圖 -->
-            <div id="job-list-view" class="space-y-8">
-                <div id="promo-banner" class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl p-8 text-white shadow-lg relative overflow-hidden">
-                    <div class="relative z-10">
-                        <span class="bg-white/20 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">最新情報</span>
-                        <h2 class="text-3xl font-bold mt-2 mb-4">發現你的下一站</h2>
-                        <p class="text-blue-100 max-w-md">我們整理了超過 10 個核心行業，為您推薦最合適的崗位。</p>
-                    </div>
-                </div>
-                <div>
-                    <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center justify-between">
-                        <span id="list-title">最新招聘職位</span>
-                        <span class="text-xs font-normal text-gray-400" id="result-count"></span>
-                    </h2>
-                    <div id="job-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        <!-- 中間：主要內容區 -->
+        <section class="flex-1 space-y-6">
+            
+            <!-- 搜尋區 -->
+            <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-md">
+                <div class="relative group">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-blue-500 transition"></i>
+                    <input type="text" id="jobSearchInput" placeholder="搜尋職位、公司..." 
+                        class="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-blue-500/20 transition outline-none"
+                        oninput="window.applyFilters()">
                 </div>
             </div>
 
-            <!-- 僱主發佈職位 (登入後顯示) -->
-            <div id="employer-post-section" class="hidden fade-in">
-                <div class="bg-white rounded-3xl p-6 shadow-sm border-2 border-blue-100">
-                    <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-                            <i class="fas fa-plus-circle text-blue-600"></i> 發佈新職位
-                        </h2>
-                        <button onclick="togglePostForm()" id="post-toggle-btn" class="text-blue-600 text-sm font-medium hover:underline">展開表單</button>
+            <!-- 發佈按鈕 (僅限登入後) -->
+            <div id="employer-post-section" class="hidden">
+                <div class="bg-blue-600 p-6 rounded-3xl text-white shadow-xl shadow-blue-100 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div>
+                        <h3 class="font-bold text-lg">招募新夥伴？</h3>
+                        <p class="text-blue-100 text-xs">讓更多專業人才看見你的職位。</p>
                     </div>
-                    <form id="job-post-form" class="hidden space-y-4 pt-2">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <input type="text" id="post-company" placeholder="公司名" class="px-4 py-2 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500" required>
-                            <input type="text" id="post-title" placeholder="職位名稱" class="px-4 py-2 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500" required>
-                            <select id="post-category" class="px-4 py-2 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500" required>
-                                <option value="">選擇分類</option>
-                                <option value="保安及物業管理">保安及物業管理</option>
-                                <option value="飲食">飲食</option>
-                                <option value="包裝">包裝</option>
-                                <option value="運輸及物流">運輸及物流</option>
-                                <option value="教育">教育</option>
-                                <option value="健身">健身</option>
-                                <option value="辦公室">辦公室</option>
-                                <option value="活動及推廣">活動及推廣</option>
-                                <option value="醫療保健">醫療保健</option>
-                                <option value="建造業">建造業</option>
-                                <option value="清潔">清潔</option>
-                                <option value="客戶服務">客戶服務</option>
-                            </select>
-                            <select id="post-location" class="px-4 py-2 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500" required>
-                                <option value="香港島">香港島</option>
-                                <option value="九龍">九龍</option>
-                                <option value="新界區">新界區</option>
-                            </select>
-                            <select id="post-type" class="px-4 py-2 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500" required>
-                                <option value="全職">全職</option>
-                                <option value="兼職">兼職</option>
-                                <option value="臨時工">臨時工</option>
-                            </select>
-                            <input type="text" id="post-salary" placeholder="薪金 (例如: $18,000)" class="px-4 py-2 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500" required>
-                            <input type="text" id="post-contact" placeholder="負責人" class="px-4 py-2 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500" required>
-                            <input type="tel" id="post-phone" placeholder="電話" class="px-4 py-2 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500" required>
-                        </div>
-                        <textarea id="post-content" rows="4" placeholder="工作要求與福利..." class="w-full px-4 py-2 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500" required></textarea>
-                        <div class="flex justify-end gap-3">
-                            <button type="submit" class="bg-blue-600 text-white px-8 py-2 rounded-xl font-bold hover:bg-blue-700 transition">立即發佈</button>
-                        </div>
-                    </form>
+                    <button id="post-toggle-btn" onclick="window.togglePostForm()" class="px-8 py-3 bg-white text-blue-600 rounded-xl font-bold text-sm hover:bg-blue-50 transition shadow-lg">
+                        發佈職位
+                    </button>
                 </div>
+                
+                <form id="job-post-form" class="hidden mt-4 bg-white p-6 rounded-3xl border-2 border-dashed border-blue-100 space-y-4 fade-in">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" id="post-title" placeholder="職位名稱" required class="w-full p-3 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white border-transparent focus:border-blue-500 border-2 transition">
+                        <input type="text" id="post-company" placeholder="公司名稱" required class="w-full p-3 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white border-transparent focus:border-blue-500 border-2 transition">
+                        <select id="post-category" class="w-full p-3 bg-slate-50 rounded-xl text-sm outline-none">
+                            <option value="保安及物業管理">保安及物業管理</option>
+                            <option value="飲食">飲食</option>
+                            <option value="運輸及物流">運輸及物流</option>
+                            <option value="客戶服務">客戶服務</option>
+                        </select>
+                        <select id="post-location" class="w-full p-3 bg-slate-50 rounded-xl text-sm outline-none">
+                            <option value="九龍">九龍</option>
+                            <option value="香港島">香港島</option>
+                            <option value="新界區">新界區</option>
+                            <option value="大嶼山">大嶼山</option>
+                        </select>
+                        <select id="post-type" class="w-full p-3 bg-slate-50 rounded-xl text-sm outline-none">
+                            <option value="全職">全職</option>
+                            <option value="兼職">兼職</option>
+                            <option value="臨時/合約">臨時/合約</option>
+                        </select>
+                        <input type="text" id="post-salary" placeholder="薪酬 (例: $18,000 / $65小時)" class="w-full p-3 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white border-transparent focus:border-blue-500 border-2 transition">
+                        <input type="text" id="post-contact" placeholder="聯絡人姓名" class="w-full p-3 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white border-transparent focus:border-blue-500 border-2 transition">
+                        <input type="tel" id="post-phone" placeholder="聯絡電話" class="w-full p-3 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white border-transparent focus:border-blue-500 border-2 transition">
+                    </div>
+                    <textarea id="post-content" rows="4" placeholder="職位詳情與要求..." class="w-full p-4 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white border-transparent focus:border-blue-500 border-2 transition"></textarea>
+                    <button type="submit" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg">確認發佈</button>
+                </form>
             </div>
 
-            <!-- 詳情視圖 -->
-            <div id="job-detail-view" class="hidden">
-                <button onclick="showListPage()" class="flex items-center gap-2 text-blue-600 mb-6 font-medium hover:gap-3 transition-all">
+            <!-- 職位列表視圖 -->
+            <div id="job-list-view" class="fade-in">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 id="list-title" class="text-xl font-bold text-slate-800">最新招聘職位</h2>
+                    <span id="result-count" class="text-xs font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-full"></span>
+                </div>
+                <div id="job-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            </div>
+
+            <!-- 職位詳情視圖 -->
+            <div id="job-detail-view" class="hidden fade-in">
+                <button onclick="window.showListPage()" class="mb-6 flex items-center gap-2 text-sm text-slate-500 hover:text-blue-600 transition">
                     <i class="fas fa-arrow-left"></i> 返回職位列表
                 </button>
-                <div id="detail-container" class="bg-white rounded-3xl p-8 shadow-sm border border-gray-100"></div>
+                <div id="detail-container" class="bg-white p-8 rounded-3xl border border-gray-100 shadow-xl"></div>
             </div>
 
-            <!-- 管理中心 -->
-            <div id="employer-profile-view" class="hidden fade-in space-y-6">
-                <button onclick="showListPage()" class="flex items-center gap-2 text-blue-600 mb-2 font-medium">
-                    <i class="fas fa-arrow-left"></i> 返回首頁
-                </button>
-                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div class="bg-blue-600 h-20"></div>
-                    <div class="px-8 pb-6">
-                        <div class="flex justify-between items-end -mt-8 mb-4">
-                            <img id="profile-avatar" class="w-16 h-16 rounded-2xl border-4 border-white shadow-md bg-white" src="" alt="Avatar">
-                            <div class="flex gap-2">
-                                <button onclick="switchTab('my-jobs')" id="tab-my-jobs" class="tab-btn px-4 py-2 rounded-lg text-xs font-bold bg-blue-50 text-blue-600 border border-blue-100">我的職位</button>
-                                <button onclick="switchTab('applications')" id="tab-applications" class="tab-btn px-4 py-2 rounded-lg text-xs font-bold text-gray-500 hover:bg-gray-50 transition">收到的申請</button>
+            <!-- 管理中心視圖 -->
+            <div id="employer-profile-view" class="hidden fade-in">
+                <div class="bg-white rounded-3xl border border-gray-100 shadow-xl overflow-hidden">
+                    <div class="bg-slate-900 p-8 text-white">
+                        <div class="flex items-center gap-6">
+                            <img id="profile-avatar" class="w-20 h-20 rounded-2xl border-4 border-white/10" src="">
+                            <div>
+                                <h2 id="profile-name" class="text-2xl font-bold"></h2>
+                                <p id="profile-email" class="text-slate-400 text-sm"></p>
+                                <button onclick="window.handleLogout()" class="mt-3 text-xs bg-red-500/20 text-red-300 px-4 py-1.5 rounded-lg hover:bg-red-500/30 transition">登出帳號</button>
                             </div>
                         </div>
-                        <h2 class="text-xl font-bold text-gray-900" id="profile-name">僱主名稱</h2>
-                        <p class="text-gray-400 text-xs tracking-tight" id="profile-email"></p>
+                    </div>
+                    <div class="p-8">
+                        <div class="flex gap-4 border-b border-gray-100 mb-6">
+                            <button id="tab-my-jobs" onclick="window.switchTab('my-jobs')" class="tab-btn pb-4 px-2 text-sm font-bold border-b-2 transition">我發佈的職位</button>
+                            <button id="tab-applications" onclick="window.switchTab('applications')" class="tab-btn pb-4 px-2 text-sm font-bold border-b-2 transition">收到的申請</button>
+                        </div>
+                        <div id="tab-content" class="space-y-4"></div>
                     </div>
                 </div>
-                <div id="tab-content" class="space-y-4"></div>
             </div>
+
         </section>
     </main>
 
     <!-- 登入彈窗 -->
-    <div id="login-modal" class="fixed inset-0 bg-black/50 hidden z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl w-full max-w-sm p-8 relative shadow-2xl">
-            <button onclick="closeLoginModal()" class="absolute right-6 top-6 text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+    <div id="login-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="window.closeLoginModal()"></div>
+        <div class="bg-white w-full max-w-sm p-8 rounded-3xl shadow-2xl relative fade-in">
+            <button onclick="window.closeLoginModal()" class="absolute right-6 top-6 text-gray-300 hover:text-gray-600"><i class="fas fa-times"></i></button>
             <div class="text-center mb-8">
                 <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-user-tie text-blue-600 text-2xl"></i>
+                    <i class="fas fa-user-circle text-blue-600 text-3xl"></i>
                 </div>
-                <h2 class="text-2xl font-bold text-gray-900">招聘方登入</h2>
-                <p class="text-gray-500 text-sm mt-2">使用 Google 帳戶管理您的職位</p>
+                <h3 class="text-2xl font-black text-slate-900">歡迎回來</h3>
+                <p class="text-slate-400 text-sm mt-2">請登入以發佈職位或查看申請。</p>
             </div>
-            
-            <button id="google-login-btn" class="w-full google-btn bg-white text-gray-700 py-3.5 rounded-xl font-bold flex items-center justify-center gap-3 transition">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5" alt="Google">
+            <button id="google-login-btn" class="w-full py-4 border-2 border-gray-100 rounded-2xl flex items-center justify-center gap-3 font-bold hover:bg-slate-50 hover:border-blue-100 transition">
+                <img src="https://www.google.com/favicon.ico" class="w-5 h-5">
                 使用 Google 帳號登入
             </button>
-            
-            <p class="text-[10px] text-gray-400 text-center mt-6">登入即代表您同意服務條款與隱私權政策</p>
         </div>
     </div>
 
-    <!-- 申請彈窗 -->
-    <div id="apply-modal" class="fixed inset-0 bg-black/50 hidden z-[70] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl w-full max-w-lg p-8 relative shadow-2xl">
-            <button onclick="closeApplyModal()" class="absolute right-6 top-6 text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
-            <div class="text-center mb-6">
-                <h2 class="text-2xl font-bold text-gray-900">提交職位申請</h2>
-                <p id="apply-job-title" class="text-blue-600 font-medium mt-1"></p>
-            </div>
+    <!-- 申請職位彈窗 -->
+    <div id="apply-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="window.closeApplyModal()"></div>
+        <div class="bg-white w-full max-w-md p-8 rounded-3xl shadow-2xl relative fade-in">
+            <h3 class="text-xl font-bold mb-1">提交申請</h3>
+            <p id="apply-job-title" class="text-blue-600 text-sm font-bold mb-6"></p>
             <form id="apply-form" class="space-y-4">
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="text" id="apply-name" placeholder="您的姓名" class="w-full px-4 py-3 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500" required>
-                    <input type="tel" id="apply-phone" placeholder="聯絡電話" class="w-full px-4 py-3 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500" required>
-                </div>
-                <textarea id="apply-experience" rows="4" class="w-full px-4 py-3 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500" placeholder="簡單描述您的相關經驗..." required></textarea>
-                <button type="submit" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition">確認提交申請</button>
+                <input type="text" id="apply-name" placeholder="姓名" required class="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/20">
+                <input type="tel" id="apply-phone" placeholder="聯絡電話" required class="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/20">
+                <textarea id="apply-experience" rows="4" placeholder="簡單介紹你的相關經驗..." required class="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/20"></textarea>
+                <button type="submit" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-blue-100 hover:bg-blue-700 transition">確認申請</button>
             </form>
         </div>
     </div>
 
-    <!-- Toast -->
-    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full text-sm font-medium hidden z-[100] shadow-2xl">
+    <!-- Toast 提示 -->
+    <div id="toast" class="hidden fixed bottom-10 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-6 py-3 rounded-full text-xs font-bold shadow-2xl flex items-center gap-3 fade-in">
+        <i class="fas fa-check-circle text-green-400"></i>
         <span id="toast-msg"></span>
     </div>
 
-    <!-- Firebase SDK & App Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // 1. 初始化資料
+        // 1. 初始化資料與狀態
         const POPULAR_CATEGORIES = ["保安及物業管理", "飲食", "包裝", "運輸及物流", "教育", "健身", "辦公室", "活動及推廣", "醫療保健", "建造業", "清潔", "客戶服務"];
-        
-        // 模擬數據庫 (實際應連接 Firestore)
         let mockJobs = [
             { id: Date.now() + 1, date: '2024-04-20', title: "高級物業管理員", company: "信和物業", category: "保安及物業管理", contact: "Mr. Wong", phone: "23334444", location: "九龍", type: "全職", salary: "$19,000", icon: "fas fa-shield-alt text-blue-500", desc: "負責屋苑日常保安及客戶服務。", owner: "sino_hr@gmail.com" },
             { id: Date.now() + 2, date: '2024-04-19', title: "連鎖店廚務助理", company: "太興集團", category: "飲食", contact: "Ms. Lee", phone: "21110000", location: "香港島", type: "兼職", salary: "$65/小時", icon: "fas fa-utensils text-orange-500", desc: "協助廚師準備食材及維持廚房清潔。", owner: "taihing_hr@gmail.com" },
@@ -297,21 +212,21 @@
         let selectedCategory = null;
         let currentUser = null;
 
-        // 2. Firebase 配置 (請確保您的 API Key 正確)
-const firebaseConfig = {
-    apiKey: "AIzaSyCPJpA6HIGlDZ1gnOC68tbQune6msp5BPg",
-    authDomain: "track-job-portal.firebaseapp.com",
-    projectId: "track-job-portal",
-    storageBucket: "track-job-portal.firebasestorage.app",
-    messagingSenderId: "968955074908",
-    appId: "1:968955074908:web:20c3f9e78c2487c7440999"
-};
+        // 2. Firebase 配置 (已確保使用最新 API 金鑰)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCPJpA6HIGlDZ1gnOC68tbQune6msp5BPg",
+            authDomain: "track-job-portal.firebaseapp.com",
+            projectId: "track-job-portal",
+            storageBucket: "track-job-portal.firebasestorage.app",
+            messagingSenderId: "968955074908",
+            appId: "1:968955074908:web:20c3f9e78c2487c7440999"
+        };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
 
-        // 3. 全局函數掛載
+        // 3. UI 渲染函數
         window.renderCategories = () => {
             const nav = document.getElementById('category-nav');
             if(!nav) return;
@@ -330,15 +245,10 @@ const provider = new GoogleAuthProvider();
         window.applyFilters = () => {
             const searchInput = document.getElementById('jobSearchInput');
             const searchQuery = searchInput ? searchInput.value.toLowerCase() : '';
-            const selectedTypes = Array.from(document.querySelectorAll('input[name="typeFilter"]:checked')).map(cb => cb.value);
-            const selectedLocs = Array.from(document.querySelectorAll('input[name="locFilter"]:checked')).map(cb => cb.value);
-
             const filtered = mockJobs.filter(job => {
                 const matchSearch = job.title.toLowerCase().includes(searchQuery) || job.company.toLowerCase().includes(searchQuery);
-                const matchType = selectedTypes.length === 0 || selectedTypes.includes(job.type);
-                const matchLoc = selectedLocs.length === 0 || selectedLocs.includes(job.location);
                 const matchCat = !selectedCategory || job.category === selectedCategory;
-                return matchSearch && matchType && matchLoc && matchCat;
+                return matchSearch && matchCat;
             });
 
             document.getElementById('list-title').textContent = selectedCategory || "最新招聘職位";
@@ -368,6 +278,7 @@ const provider = new GoogleAuthProvider();
             });
         };
 
+        // 4. 視圖導航
         window.hideAll = () => ['job-list-view', 'job-detail-view', 'employer-post-section', 'employer-profile-view'].forEach(id => document.getElementById(id)?.classList.add('hidden'));
         
         window.showListPage = () => { 
@@ -392,6 +303,7 @@ const provider = new GoogleAuthProvider();
                 <button onclick="window.openApplyModal('${job.title}', '${job.id}', '${job.owner}')" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 shadow-xl shadow-blue-100 transition">立即申請職位</button>`;
         };
 
+        // 5. Authentication 核心邏輯
         onAuthStateChanged(auth, (user) => {
             currentUser = user;
             const authBtn = document.getElementById('auth-buttons');
@@ -412,34 +324,37 @@ const provider = new GoogleAuthProvider();
             window.applyFilters();
         });
 
-        document.getElementById('google-login-btn').onclick = async () => {
-            try {
-                await signInWithPopup(auth, provider);
-                window.showToast("登入成功！歡迎回來。");
-                window.closeLoginModal();
-            } catch (e) {
-                console.error(e);
-                window.showToast("登入失敗，請稍後再試。");
-            }
-        };
+        // 確保 Google 登入按鈕綁定
+        const googleLoginBtn = document.getElementById('google-login-btn');
+        if (googleLoginBtn) {
+            googleLoginBtn.onclick = async () => {
+                try {
+                    await signInWithPopup(auth, provider);
+                    window.showToast("登入成功！歡迎回來。");
+                    window.closeLoginModal();
+                } catch (e) {
+                    console.error("登入錯誤細節:", e);
+                    window.showToast("登入失敗，請檢查網路或彈窗是否被封鎖。");
+                }
+            };
+        }
 
         window.handleLogout = () => signOut(auth).then(() => {
             window.showToast("已安全登出");
             window.showListPage();
         });
 
+        // 6. 其他 UI 交互
         window.openLoginModal = () => document.getElementById('login-modal').classList.remove('hidden');
         window.closeLoginModal = () => document.getElementById('login-modal').classList.add('hidden');
         window.showToast = (msg) => { const t = document.getElementById('toast'); document.getElementById('toast-msg').textContent = msg; t.classList.remove('hidden'); setTimeout(() => t.classList.add('hidden'), 3000); };
-        window.resetFilters = () => { document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false); document.getElementById('jobSearchInput').value = ''; selectedCategory = null; window.renderCategories(); window.applyFilters(); };
+        window.resetFilters = () => { document.getElementById('jobSearchInput').value = ''; selectedCategory = null; window.renderCategories(); window.applyFilters(); };
         window.resetFiltersAndShowList = () => { window.resetFilters(); window.showListPage(); };
-        window.togglePostForm = () => { const f = document.getElementById('job-post-form'); const isH = f.classList.contains('hidden'); f.classList.toggle('hidden', !isH); document.getElementById('post-toggle-btn').textContent = isH ? "收起表單" : "展開表單"; };
+        window.togglePostForm = () => { const f = document.getElementById('job-post-form'); const isH = f.classList.contains('hidden'); f.classList.toggle('hidden', !isH); document.getElementById('post-toggle-btn').textContent = isH ? "收起表單" : "發佈職位"; };
 
-        // 提交發佈職位
         document.getElementById('job-post-form').onsubmit = (e) => {
             e.preventDefault();
             if(!currentUser) return window.showToast("請先登入");
-            
             const newJob = {
                 id: Date.now(),
                 date: new Date().toISOString().split('T')[0],
@@ -455,7 +370,6 @@ const provider = new GoogleAuthProvider();
                 owner: currentUser.email,
                 icon: "fas fa-briefcase text-blue-500"
             };
-            
             mockJobs.unshift(newJob);
             window.showToast("職位已成功發佈！");
             document.getElementById('job-post-form').reset();
@@ -470,9 +384,7 @@ const provider = new GoogleAuthProvider();
             document.getElementById('apply-form').onsubmit = (e) => {
                 e.preventDefault();
                 applications.push({ 
-                    jobId: id, 
-                    jobTitle: title, 
-                    jobOwner: owner, 
+                    jobId: id, jobTitle: title, jobOwner: owner, 
                     name: document.getElementById('apply-name').value, 
                     phone: document.getElementById('apply-phone').value, 
                     experience: document.getElementById('apply-experience').value, 
@@ -497,19 +409,19 @@ const provider = new GoogleAuthProvider();
 
         window.switchTab = (tab) => {
             const content = document.getElementById('tab-content');
-            document.querySelectorAll('.tab-btn').forEach(b => b.className = "tab-btn px-4 py-2 rounded-lg text-xs font-bold text-gray-500 hover:bg-gray-50 transition");
-            document.getElementById(`tab-${tab}`).className = "tab-btn px-4 py-2 rounded-lg text-xs font-bold bg-blue-50 text-blue-600 border border-blue-100";
+            document.querySelectorAll('.tab-btn').forEach(b => b.className = "tab-btn pb-4 px-2 text-sm font-bold border-b-2 border-transparent text-gray-400 transition");
+            document.getElementById(`tab-${tab}`).className = "tab-btn pb-4 px-2 text-sm font-bold border-b-2 border-blue-600 text-blue-600";
             
             if(tab === 'my-jobs') {
                 const myJobs = mockJobs.filter(j => j.owner === currentUser.email);
-                content.innerHTML = myJobs.length ? myJobs.map(j => `<div class="bg-white p-4 rounded-xl border border-gray-100 flex justify-between items-center shadow-sm"><div><p class="font-bold text-gray-800 text-sm">${j.title}</p><p class="text-[10px] text-gray-400">${j.date} • ${j.location}</p></div><span class="text-[10px] bg-green-50 text-green-600 px-2 py-0.5 rounded-full font-bold">招聘中</span></div>`).join('') : '<p class="text-center py-10 text-gray-400 text-xs">尚未發佈職位</p>';
+                content.innerHTML = myJobs.length ? myJobs.map(j => `<div class="bg-slate-50 p-4 rounded-xl border border-gray-100 flex justify-between items-center"><div><p class="font-bold text-gray-800 text-sm">${j.title}</p><p class="text-[10px] text-gray-400">${j.date} • ${j.location}</p></div><span class="text-[10px] bg-green-50 text-green-600 px-2 py-0.5 rounded-full font-bold">招聘中</span></div>`).join('') : '<p class="text-center py-10 text-gray-400 text-xs">尚未發佈職位</p>';
             } else {
                 const myApps = applications.filter(a => a.jobOwner === currentUser.email);
-                content.innerHTML = myApps.length ? myApps.map(a => `<div class="bg-white p-5 rounded-2xl border border-gray-100 space-y-2 shadow-sm"><div><p class="text-[10px] font-bold text-blue-600">${a.jobTitle}</p><p class="font-bold text-gray-900">${a.name}</p></div><div class="text-[11px] text-gray-500 bg-gray-50 p-3 rounded-lg">${a.experience}</div></div>`).join('') : '<p class="text-center py-10 text-gray-400 text-xs">尚無申請資料</p>';
+                content.innerHTML = myApps.length ? myApps.map(a => `<div class="bg-slate-50 p-5 rounded-2xl border border-gray-100 space-y-2"><div><p class="text-[10px] font-bold text-blue-600">${a.jobTitle}</p><p class="font-bold text-gray-900">${a.name}</p></div><div class="text-[11px] text-gray-500 bg-white p-3 rounded-lg border border-gray-100">${a.experience}</div></div>`).join('') : '<p class="text-center py-10 text-gray-400 text-xs">尚無申請資料</p>';
             }
         };
 
-        // 初始化
+        // 初始化頁面
         window.addEventListener('DOMContentLoaded', () => {
             window.renderCategories();
             window.applyFilters();
