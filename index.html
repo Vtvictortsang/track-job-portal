@@ -132,7 +132,24 @@
 
         <!-- 右側主內容區 -->
         <section id="main-content-area" class="flex-1 flex flex-col gap-8">
-            
+            <!-- 列表視圖 -->
+            <div id="job-list-view" class="space-y-8">
+                <div id="promo-banner" class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl p-8 text-white shadow-lg relative overflow-hidden">
+                    <div class="relative z-10">
+                        <span class="bg-white/20 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">最新情報</span>
+                        <h2 class="text-3xl font-bold mt-2 mb-4">發現你的下一站</h2>
+                        <p class="text-blue-100 max-w-md">我們整理了超過 10 個核心行業，為您推薦最合適的崗位。</p>
+                    </div>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center justify-between">
+                        <span id="list-title">最新招聘職位</span>
+                        <span class="text-xs font-normal text-gray-400" id="result-count"></span>
+                    </h2>
+                    <div id="job-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                </div>
+            </div>
+
             <!-- 僱主發佈職位 (隱藏) -->
             <div id="employer-post-section" class="hidden fade-in">
                 <div class="bg-white rounded-3xl p-6 shadow-sm border-2 border-blue-100">
@@ -183,25 +200,6 @@
                 </div>
             </div>
 
-            <!-- 列表視圖 -->
-            <div id="job-list-view" class="space-y-8">
-                <div id="promo-banner" class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl p-8 text-white shadow-lg relative overflow-hidden">
-                    <div class="relative z-10">
-                        <span class="bg-white/20 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">最新情報</span>
-                        <h2 class="text-3xl font-bold mt-2 mb-4">發現你的下一站</h2>
-                        <p class="text-blue-100 max-w-md">我們整理了超過 10 個核心行業，為您推薦最合適的崗位。</p>
-                    </div>
-                </div>
-
-                <div>
-                    <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center justify-between">
-                        <span id="list-title">最新招聘職位</span>
-                        <span class="text-xs font-normal text-gray-400" id="result-count"></span>
-                    </h2>
-                    <div id="job-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-                </div>
-            </div>
-
             <!-- 詳情視圖 -->
             <div id="job-detail-view" class="hidden">
                 <button onclick="showListPage()" class="flex items-center gap-2 text-blue-600 mb-6 font-medium hover:gap-3 transition-all">
@@ -234,7 +232,7 @@
         </section>
     </main>
 
-    <!-- 登入彈窗 (更新為 Google 登入) -->
+    <!-- 登入彈窗 -->
     <div id="login-modal" class="fixed inset-0 bg-black/50 hidden z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl w-full max-w-sm p-8 relative shadow-2xl">
             <button onclick="closeLoginModal()" class="absolute right-6 top-6 text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
@@ -246,7 +244,7 @@
                 <p class="text-gray-500 text-sm mt-2">使用 Google 帳戶管理您的職位</p>
             </div>
             
-            <button onclick="handleGoogleLogin()" class="w-full google-btn bg-white text-gray-700 py-3.5 rounded-xl font-bold flex items-center justify-center gap-3 transition">
+            <button id="google-login-btn" class="w-full google-btn bg-white text-gray-700 py-3.5 rounded-xl font-bold flex items-center justify-center gap-3 transition">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5" alt="Google">
                 使用 Google 帳號登入
             </button>
@@ -279,19 +277,13 @@
         <span id="toast-msg"></span>
     </div>
 
-    <!-- Firebase SDKs -->
+    <!-- Firebase SDK & App Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // Firebase 設定
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
-
-        // 全局狀態
-        let currentUser = null;
+        // 1. 初始化資料
+        const POPULAR_CATEGORIES = ["保安及物業管理", "飲食", "包裝", "運輸及物流", "教育", "健身", "辦公室", "活動及推廣", "醫療保健", "建造業", "清潔", "客戶服務"];
         let mockJobs = [
             { id: 1, date: '2024-04-20', title: "高級物業管理員", company: "信和物業", category: "保安及物業管理", contact: "Mr. Wong", phone: "23334444", location: "九龍", type: "全職", salary: "$19,000", icon: "fas fa-shield-alt text-blue-500", desc: "負責屋苑日常保安及客戶服務。", owner: "sino_hr@gmail.com" },
             { id: 2, date: '2024-04-19', title: "連鎖店廚務助理", company: "太興集團", category: "飲食", contact: "Ms. Lee", phone: "21110000", location: "香港島", type: "兼職", salary: "$65/小時", icon: "fas fa-utensils text-orange-500", desc: "協助廚師準備食材及維持廚房清潔。", owner: "taihing_hr@gmail.com" },
@@ -299,64 +291,27 @@
         ];
         let applications = [];
         let selectedCategory = null;
-        let currentJobForApply = null;
+        let currentUser = null;
 
-        const POPULAR_CATEGORIES = [
-            "保安及物業管理", "飲食", "包裝", "運輸及物流", 
-            "教育", "健身", "辦公室", "活動及推廣", 
-            "醫療保健", "建造業", "清潔", "客戶服務"
-        ];
-
-        // 監聽登入狀態
-        onAuthStateChanged(auth, (user) => {
-            currentUser = user;
-            updateUI(user);
-            renderCategories();
-            applyFilters();
-        });
-
-        // 登入功能
-        window.handleGoogleLogin = async () => {
-            try {
-                const result = await signInWithPopup(auth, provider);
-                showToast(`歡迎回來，${result.user.displayName}`);
-                closeLoginModal();
-            } catch (error) {
-                console.error("Login failed", error);
-                showToast("登入失敗，請稍後再試");
-            }
+        // 2. 核心功能函數 (掛載到 window)
+        window.renderCategories = () => {
+            const nav = document.getElementById('category-nav');
+            if(!nav) return;
+            nav.innerHTML = '';
+            POPULAR_CATEGORIES.forEach(cat => {
+                const count = mockJobs.filter(j => j.category === cat).length;
+                const a = document.createElement('a');
+                const isActive = selectedCategory === cat;
+                a.className = `flex items-center justify-between p-2.5 rounded-xl transition cursor-pointer group ${isActive ? 'bg-blue-600 text-white' : 'hover:bg-blue-50 text-gray-600'}`;
+                a.innerHTML = `<span class="text-xs font-medium">${cat}</span><span class="text-[9px] px-1.5 py-0.5 rounded-full ${isActive ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-400'}">${count}</span>`;
+                a.onclick = () => { selectedCategory = isActive ? null : cat; window.renderCategories(); window.applyFilters(); };
+                nav.appendChild(a);
+            });
         };
 
-        // 登出功能
-        window.handleLogout = async () => {
-            await signOut(auth);
-            showToast("已成功登出");
-            showListPage();
-        };
-
-        // UI 更新
-        function updateUI(user) {
-            const authButtons = document.getElementById('auth-buttons');
-            const userProfile = document.getElementById('user-profile');
-            const employerPost = document.getElementById('employer-post-section');
-
-            if (user) {
-                authButtons.classList.add('hidden');
-                userProfile.classList.remove('hidden');
-                employerPost.classList.remove('hidden');
-                
-                document.getElementById('user-name').textContent = user.displayName;
-                document.getElementById('user-avatar').src = user.photoURL || 'https://via.placeholder.com/150';
-            } else {
-                authButtons.classList.remove('hidden');
-                userProfile.classList.add('hidden');
-                employerPost.classList.add('hidden');
-            }
-        }
-
-        // 核心邏輯
         window.applyFilters = () => {
-            const searchQuery = document.getElementById('jobSearchInput').value.toLowerCase();
+            const searchInput = document.getElementById('jobSearchInput');
+            const searchQuery = searchInput ? searchInput.value.toLowerCase() : '';
             const selectedTypes = Array.from(document.querySelectorAll('input[name="typeFilter"]:checked')).map(cb => cb.value);
             const selectedLocs = Array.from(document.querySelectorAll('input[name="locFilter"]:checked')).map(cb => cb.value);
 
@@ -368,47 +323,19 @@
                 return matchSearch && matchType && matchLoc && matchCat;
             });
 
-            let headerText = selectedCategory || "最新招聘職位";
-            document.getElementById('list-title').innerHTML = headerText;
-            renderJobs(filtered);
+            document.getElementById('list-title').textContent = selectedCategory || "最新招聘職位";
             document.getElementById('result-count').textContent = `找到 ${filtered.length} 個結果`;
-        };
-
-        window.renderCategories = () => {
-            const nav = document.getElementById('category-nav');
-            nav.innerHTML = '';
-            POPULAR_CATEGORIES.forEach(cat => {
-                const count = mockJobs.filter(j => j.category === cat).length;
-                const a = document.createElement('a');
-                const isActive = selectedCategory === cat;
-                a.className = `flex items-center justify-between p-2.5 rounded-xl transition cursor-pointer group ${isActive ? 'bg-blue-600 text-white' : 'hover:bg-blue-50 text-gray-600'}`;
-                a.innerHTML = `
-                    <span class="text-xs font-medium">${cat}</span>
-                    <span class="text-[9px] px-1.5 py-0.5 rounded-full ${isActive ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-400'}">${count}</span>
-                `;
-                a.onclick = () => {
-                    selectedCategory = isActive ? null : cat;
-                    renderCategories();
-                    applyFilters();
-                };
-                nav.appendChild(a);
-            });
-        };
-
-        function renderJobs(jobs) {
+            
             const grid = document.getElementById('job-grid');
-            grid.innerHTML = '';
-            if(!jobs.length) {
-                grid.innerHTML = `<div class="col-span-full py-16 text-center"><p class="text-gray-400 text-sm">目前沒有符合條件的職位</p></div>`;
-                return;
-            }
-            jobs.sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(job => {
+            if(!grid) return;
+            grid.innerHTML = filtered.length ? '' : `<div class="col-span-full py-16 text-center text-gray-400 text-sm">目前沒有符合條件的職位</div>`;
+            filtered.sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(job => {
                 const div = document.createElement('div');
                 div.className = "bg-white p-5 rounded-2xl border border-gray-100 hover:border-blue-200 hover:shadow-lg transition cursor-pointer fade-in group";
-                div.onclick = () => showDetailPage(job);
+                div.onclick = () => window.showDetailPage(job);
                 div.innerHTML = `
                     <div class="flex gap-4">
-                        <div class="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center border border-gray-100"><i class="${job.icon || 'fas fa-briefcase text-gray-300'}"></i></div>
+                        <div class="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center border border-gray-100"><i class="${job.icon}"></i></div>
                         <div class="flex-1">
                             <h3 class="font-bold text-gray-900 group-hover:text-blue-600 transition text-sm">${job.title}</h3>
                             <p class="text-[11px] text-gray-400 mb-2">${job.company}</p>
@@ -418,94 +345,104 @@
                                 <span class="text-[10px] bg-indigo-50 px-2 py-0.5 rounded-md text-indigo-600">${job.type}</span>
                             </div>
                         </div>
-                    </div>
-                `;
+                    </div>`;
                 grid.appendChild(div);
             });
-        }
-
-        // 發佈功能
-        document.getElementById('job-post-form').onsubmit = (e) => {
-            e.preventDefault();
-            if(!currentUser) return showToast("請先登入");
-            const newJob = {
-                id: Date.now(),
-                date: new Date().toISOString().split('T')[0],
-                title: document.getElementById('post-title').value,
-                company: document.getElementById('post-company').value,
-                category: document.getElementById('post-category').value,
-                location: document.getElementById('post-location').value,
-                type: document.getElementById('post-type').value,
-                salary: document.getElementById('post-salary').value,
-                contact: document.getElementById('post-contact').value,
-                phone: document.getElementById('post-phone').value,
-                desc: document.getElementById('post-content').value,
-                icon: "fas fa-briefcase text-gray-400",
-                owner: currentUser.email,
-                isUserJob: true
-            };
-            mockJobs.push(newJob);
-            applyFilters();
-            renderCategories();
-            e.target.reset();
-            togglePostForm();
-            showToast("職位已成功發佈！");
         };
 
-        // 申請功能
-        document.getElementById('apply-form').onsubmit = (e) => {
-            e.preventDefault();
-            applications.push({
-                id: Date.now(),
-                jobId: currentJobForApply.id,
-                jobTitle: currentJobForApply.title,
-                jobOwner: currentJobForApply.owner,
-                name: document.getElementById('apply-name').value,
-                phone: document.getElementById('apply-phone').value,
-                experience: document.getElementById('apply-experience').value,
-                date: new Date().toISOString().split('T')[0]
-            });
-            closeApplyModal();
-            showToast("申請已提交給僱主！");
-        };
-
-        // 頁面與組件控制
+        // UI 切換
+        window.hideAll = () => ['job-list-view', 'job-detail-view', 'employer-post-section', 'employer-profile-view'].forEach(id => document.getElementById(id)?.classList.add('hidden'));
+        window.showListPage = () => { window.hideAll(); document.getElementById('job-list-view').classList.remove('hidden'); if(currentUser) document.getElementById('employer-post-section').classList.remove('hidden'); window.applyFilters(); };
         window.showDetailPage = (job) => {
-            hideAllSections();
-            document.getElementById('job-detail-view').classList.remove('hidden');
+            window.hideAll();
+            const detail = document.getElementById('job-detail-view');
+            detail.classList.remove('hidden');
             document.getElementById('detail-container').innerHTML = `
-                <div class="mb-6">
-                    <span class="text-[10px] bg-blue-600 text-white px-2 py-1 rounded-md font-bold inline-block mb-3">${job.category}</span>
-                    <h2 class="text-2xl font-bold text-gray-900">${job.title}</h2>
-                    <p class="text-lg text-gray-400 font-medium">${job.company}</p>
-                </div>
+                <div class="mb-6"><span class="text-[10px] bg-blue-600 text-white px-2 py-1 rounded-md font-bold inline-block mb-3">${job.category}</span><h2 class="text-2xl font-bold text-gray-900">${job.title}</h2><p class="text-lg text-gray-400 font-medium">${job.company}</p></div>
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8 bg-gray-50 p-6 rounded-2xl">
                     <div><p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">待遇</p><p class="text-blue-600 font-bold">${job.salary}</p></div>
                     <div><p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">地區</p><p class="font-bold">${job.location}</p></div>
                     <div><p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">聯絡</p><p class="font-bold">${job.contact}</p></div>
                 </div>
                 <div class="prose max-w-none text-gray-600 whitespace-pre-line leading-relaxed mb-10">${job.desc}</div>
-                <button id="apply-trigger" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 shadow-xl shadow-blue-100 transition">立即申請職位</button>
-            `;
-            document.getElementById('apply-trigger').onclick = () => openApplyModal(job);
+                <button onclick="window.openApplyModal('${job.title}', '${job.id}', '${job.owner}')" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 shadow-xl shadow-blue-100 transition">立即申請職位</button>`;
         };
+
+        // 3. Firebase 初始化與 Google 登入
+        let auth;
+        try {
+            const configText = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
+            if (configText) {
+                const firebaseConfig = JSON.parse(configText);
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                const provider = new GoogleAuthProvider();
+
+                document.getElementById('google-login-btn').onclick = async () => {
+                    try {
+                        const result = await signInWithPopup(auth, provider);
+                        window.showToast(`歡迎回來，${result.user.displayName}`);
+                        window.closeLoginModal();
+                    } catch (e) { window.showToast("登入失敗"); }
+                };
+
+                window.handleLogout = async () => { await signOut(auth); window.showToast("已登出"); window.showListPage(); };
+
+                onAuthStateChanged(auth, (user) => {
+                    currentUser = user;
+                    const authBtn = document.getElementById('auth-buttons');
+                    const profile = document.getElementById('user-profile');
+                    const postSection = document.getElementById('employer-post-section');
+                    
+                    if (user) {
+                        authBtn.classList.add('hidden');
+                        profile.classList.remove('hidden');
+                        postSection.classList.remove('hidden');
+                        document.getElementById('user-name').textContent = user.displayName;
+                        document.getElementById('user-avatar').src = user.photoURL;
+                    } else {
+                        authBtn.classList.remove('hidden');
+                        profile.classList.add('hidden');
+                        postSection.classList.add('hidden');
+                    }
+                });
+            }
+        } catch (e) { console.warn("Firebase config missing, using local mock mode."); }
+
+        // 4. 其他頁面邏輯
+        window.openLoginModal = () => document.getElementById('login-modal').classList.remove('hidden');
+        window.closeLoginModal = () => document.getElementById('login-modal').classList.add('hidden');
+        window.showToast = (msg) => { const t = document.getElementById('toast'); document.getElementById('toast-msg').textContent = msg; t.classList.remove('hidden'); setTimeout(() => t.classList.add('hidden'), 3000); };
+        window.resetFilters = () => { document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false); document.getElementById('jobSearchInput').value = ''; selectedCategory = null; window.renderCategories(); window.applyFilters(); };
+        window.resetFiltersAndShowList = () => { window.resetFilters(); window.showListPage(); };
+        window.togglePostForm = () => { const f = document.getElementById('job-post-form'); const isH = f.classList.contains('hidden'); f.classList.toggle('hidden', !isH); document.getElementById('post-toggle-btn').textContent = isH ? "收起表單" : "展開表單"; };
+        
+        window.openApplyModal = (title, id, owner) => {
+            document.getElementById('apply-job-title').textContent = title;
+            document.getElementById('apply-modal').classList.remove('hidden');
+            document.getElementById('apply-form').onsubmit = (e) => {
+                e.preventDefault();
+                applications.push({ jobId: id, jobTitle: title, jobOwner: owner, name: document.getElementById('apply-name').value, phone: document.getElementById('apply-phone').value, experience: document.getElementById('apply-experience').value, date: new Date().toLocaleDateString() });
+                document.getElementById('apply-modal').classList.add('hidden');
+                window.showToast("申請已提交！");
+            };
+        };
+        window.closeApplyModal = () => document.getElementById('apply-modal').classList.add('hidden');
 
         window.showEmployerProfile = () => {
             if(!currentUser) return;
-            hideAllSections();
+            window.hideAll();
             document.getElementById('employer-profile-view').classList.remove('hidden');
             document.getElementById('profile-name').textContent = currentUser.displayName;
             document.getElementById('profile-email').textContent = currentUser.email;
-            document.getElementById('profile-avatar').src = currentUser.photoURL || 'https://via.placeholder.com/150';
-            switchTab('my-jobs');
+            document.getElementById('profile-avatar').src = currentUser.photoURL;
+            window.switchTab('my-jobs');
         };
 
         window.switchTab = (tab) => {
-            if(!currentUser) return;
             const content = document.getElementById('tab-content');
             document.getElementById('tab-my-jobs').className = tab === 'my-jobs' ? "px-4 py-2 rounded-lg text-xs font-bold bg-blue-50 text-blue-600 border border-blue-100" : "px-4 py-2 rounded-lg text-xs font-bold text-gray-500 hover:bg-gray-50 transition";
             document.getElementById('tab-applications').className = tab === 'applications' ? "px-4 py-2 rounded-lg text-xs font-bold bg-blue-50 text-blue-600 border border-blue-100" : "px-4 py-2 rounded-lg text-xs font-bold text-gray-500 hover:bg-gray-50 transition";
-
             if(tab === 'my-jobs') {
                 const myJobs = mockJobs.filter(j => j.owner === currentUser.email);
                 content.innerHTML = myJobs.length ? myJobs.map(j => `<div class="bg-white p-4 rounded-xl border border-gray-100 flex justify-between items-center shadow-sm"><div><p class="font-bold text-gray-800 text-sm">${j.title}</p><p class="text-[10px] text-gray-400">${j.date} • ${j.location}</p></div><span class="text-[10px] bg-green-50 text-green-600 px-2 py-0.5 rounded-full font-bold">招聘中</span></div>`).join('') : '<p class="text-center py-10 text-gray-400 text-xs">尚未發佈職位</p>';
@@ -515,17 +452,21 @@
             }
         };
 
-        window.resetFilters = () => { document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false); document.getElementById('jobSearchInput').value = ''; selectedCategory = null; renderCategories(); applyFilters(); };
-        window.showListPage = () => { hideAllSections(); document.getElementById('job-list-view').classList.remove('hidden'); if(currentUser) document.getElementById('employer-post-section').classList.remove('hidden'); applyFilters(); };
-        window.resetFiltersAndShowList = () => { resetFilters(); showListPage(); };
-        window.openLoginModal = () => document.getElementById('login-modal').classList.remove('hidden');
-        window.closeLoginModal = () => document.getElementById('login-modal').classList.add('hidden');
-        window.openApplyModal = (job) => { currentJobForApply = job; document.getElementById('apply-job-title').textContent = job.title; document.getElementById('apply-modal').classList.remove('hidden'); };
-        window.closeApplyModal = () => document.getElementById('apply-modal').classList.add('hidden');
-        window.togglePostForm = () => { const f = document.getElementById('job-post-form'); const isH = f.classList.contains('hidden'); f.classList.toggle('hidden', !isH); document.getElementById('post-toggle-btn').textContent = isH ? "收起表單" : "展開表單"; };
-        window.showToast = (msg) => { const t = document.getElementById('toast'); document.getElementById('toast-msg').textContent = msg; t.classList.remove('hidden'); setTimeout(() => t.classList.add('hidden'), 3000); };
-        function hideAllSections() { ['job-list-view', 'job-detail-view', 'employer-post-section', 'employer-profile-view'].forEach(id => document.getElementById(id)?.classList.add('hidden')); }
+        // 5. 發佈職位邏輯
+        document.getElementById('job-post-form').onsubmit = (e) => {
+            e.preventDefault();
+            const newJob = { id: Date.now(), date: new Date().toISOString().split('T')[0], title: document.getElementById('post-title').value, company: document.getElementById('post-company').value, category: document.getElementById('post-category').value, location: document.getElementById('post-location').value, type: document.getElementById('post-type').value, salary: document.getElementById('post-salary').value, contact: document.getElementById('post-contact').value, phone: document.getElementById('post-phone').value, desc: document.getElementById('post-content').value, icon: "fas fa-briefcase text-gray-400", owner: currentUser.email };
+            mockJobs.push(newJob);
+            window.applyFilters();
+            window.renderCategories();
+            e.target.reset();
+            window.togglePostForm();
+            window.showToast("職位已成功發佈！");
+        };
 
+        // 頁面加載後執行渲染
+        window.renderCategories();
+        window.applyFilters();
     </script>
 </body>
 </html>
